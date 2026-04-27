@@ -1,0 +1,67 @@
+{
+  "entities": {
+    "PatientProfile": {
+      "title": "Patient Profile",
+      "description": "Clinical and personal records for a ward resident.",
+      "type": "object",
+      "properties": {
+        "roomNumber": { "type": "string", "description": "Unique room identifier (e.g., RM08, 101)." },
+        "name": { "type": "string", "description": "Legal name of the resident." },
+        "age": { "type": "integer", "description": "Age of the resident." },
+        "gender": { "type": "string", "enum": ["Male", "Female", "Other"] },
+        "photoUrl": { "type": "string", "format": "uri" },
+        "description": { "type": "string", "description": "Brief care notes or background." },
+        "status": { "type": "string", "enum": ["active", "discharged", "passed_away", "archived"] },
+        "assignedNurse": { "type": "string", "description": "Name of the primary care provider." },
+        "admittedAt": { "type": "string", "format": "date-time" },
+        "vitals": {
+          "type": "object",
+          "properties": {
+            "heartRate": { "type": "integer" },
+            "movement": { "type": "integer" },
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "time": { "type": "string" },
+                  "hr": { "type": "integer" },
+                  "mov": { "type": "integer" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": ["roomNumber", "name", "status"]
+    },
+    "CareRequest": {
+      "title": "Care Request",
+      "description": "Live alert or care request from a resident or sensor.",
+      "type": "object",
+      "properties": {
+        "roomNumber": { "type": "string" },
+        "patientName": { "type": "string" },
+        "patientPhoto": { "type": "string" },
+        "need": { "type": "string" },
+        "priority": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+        "instructions": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["pending", "resolved"] },
+        "source": { "type": "string", "enum": ["manual", "voice", "sensor"] },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["roomNumber", "need", "priority", "status", "timestamp"]
+    }
+  },
+  "firestore": {
+    "patients": {
+      "schema": "PatientProfile",
+      "description": "Inventory of admitted residents."
+    },
+    "requests": {
+      "schema": "CareRequest",
+      "description": "Unified stream of care signals."
+    }
+  }
+}

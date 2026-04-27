@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:wght@700&family=JetBrains+Mono:wght@400;700&family=Big+Shoulders+Display:wght@400;600;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-agency: "Big Shoulders Display", sans-serif;
+}
+
+:root {
+  --medical-bg: #fdfaf8;
+  --medical-card: #ffffff;
+  --medical-border: #e9e0d8;
+  --medical-text: #2d2621;
+  --brand-primary: #cd5c5c;
+  --brand-secondary: #8b4513;
+}
+
+body {
+  background-color: var(--medical-bg);
+  color: var(--medical-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.medical-shadow {
+  box-shadow: 0 10px 30px -10px rgb(139 69 19 / 0.1), 0 4px 6px -4px rgb(139 69 19 / 0.05);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--medical-border);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #fdfaf8;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--brand-primary);
+  border-radius: 4px;
+}
+
+.serif {
+  font-family: var(--font-serif);
+}
+
+.font-agency {
+  font-family: var(--font-agency);
+}
+
+.hospital-card {
+  @apply bg-white border border-[#e9e0d8] p-6 shadow-sm rounded-2xl transition-all;
+}
+
+.btn-mono {
+  @apply bg-[#cd5c5c] text-white px-6 py-3 uppercase text-xs font-black tracking-widest hover:bg-[#a52a2a] transition-all rounded-lg;
+}
+
+.input-mono {
+  @apply bg-white border-b-2 border-[#e9e0d8] py-3 focus:border-[#cd5c5c] outline-none transition-all uppercase text-base tracking-wider font-bold;
+}
+
+.ai-pulse {
+  animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}

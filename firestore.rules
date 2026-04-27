@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    
+    // Entity Validators
+    function isValidPatient(data) {
+      return data.keys().hasAll(['roomNumber', 'name', 'status']) &&
+             data.roomNumber is string && data.roomNumber.size() <= 16 &&
+             data.name is string && data.name.size() <= 100 &&
+             data.status in ['active', 'discharged', 'passed_away', 'archived'] &&
+             (data.get('age', 0) is int && data.get('age', 0) >= 0 && data.get('age', 0) <= 150) &&
+             (data.get('gender', 'Other') in ['Male', 'Female', 'Other']) &&
+             (data.get('description', '') is string) &&
+             (data.get('admittedAt', request.time) is timestamp) &&
+             (data.get('assignedNurse', 'General Staff') is string) &&
+             (data.get('vitals', {}) is map);
+    }
+
+    function isValidRequest(data) {
+      return data.keys().hasAll(['roomNumber', 'patientName', 'need', 'priority', 'status', 'timestamp', 'source']) &&
+             data.roomNumber is string && data.roomNumber.size() <= 16 &&
+             data.patientName is string && data.patientName.size() <= 100 &&
+             data.need is string && data.need.size() <= 500 &&
+             data.priority in ['low', 'medium', 'high', 'critical'] &&
+             data.status in ['pending', 'resolved'] &&
+             data.source in ['manual', 'voice', 'sensor', 'vision'] &&
+             (data.get('aiNote', '') is string);
+    }
+
+    // 1. Patient Profiles
+    match /patients/{patientId} {
+      allow get: if true;
+      allow list: if true;
+      
+      allow create: if isValidPatient(incoming());
+      allow update: if (
+        isValidPatient(incoming()) && 
+        incoming().roomNumber == existing().roomNumber && (
+          (incoming().diff(existing()).affectedKeys().hasOnly(['status'])) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['vitals'])) ||
+          (incoming().diff(existing()).affectedKeys().hasOnly(['name', 'age', 'gender', 'photoUrl', 'assignedNurse', 'description']))
+        )
+      );
+      allow delete: if true; 
+    }
+
+    // 2. Care Requests
+    match /requests/{requestId} {
+      // Requests can be created by the resident or sensors
+      allow create: if isValidRequest(incoming()) && incoming().timestamp == request.time;
+      
+      // Anyone can see requests in this ward view
+      allow read: if true;
+      
+      allow update: if (
+        isValidRequest(incoming()) &&
+        incoming().roomNumber == existing().roomNumber &&
+        incoming().timestamp == existing().timestamp &&
+        incoming().diff(existing()).affectedKeys().hasOnly(['status']) &&
+        incoming().status == 'resolved'
+      );
+      
+      allow delete: if false; // Requests are never deleted, only resolved
+    }
+  }
+}

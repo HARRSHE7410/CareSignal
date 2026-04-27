@@ -1,0 +1,9 @@
+{
+  "name": "Remix: CarePulse Clinical Monitor",
+  "description": "Hospital-grade medical assistance hub with AI triaging, autonomous sensor alerts, and clinical vitals monitoring.",
+  "requestFramePermissions": [
+    "microphone",
+    "camera"
+  ],
+  "majorCapabilities": []
+}
